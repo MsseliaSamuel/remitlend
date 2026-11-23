@@ -205,7 +205,8 @@
     "details": "Details"
   },
   "AdminLayout": {
-    "adminArea": "Admin Area"
+    "adminArea": "Admin Area",
+    "translationsReview": "Financial translations"
   },
   "AdminDisputes": {
     "eyebrow": "Admin Review",
@@ -474,5 +475,178 @@
         "definition": "A loan is in default when the borrower has not made the required repayment by the due date and the missed payment threshold has been reached. Defaulted loans may trigger liquidation of the borrower's collateral."
       }
     }
+  "TranslationReview": {
+    "eyebrow": "Localization QA",
+    "title": "Financial translation review",
+    "description": "Review money and loan terms against the glossary before release. Approvals are bound to the source revision shown.",
+    "forbidden": "You need the admin role to review financial strings.",
+    "releaseReady": "Release gate: ready",
+    "releaseBlocked": "Release gate: blocked",
+    "reviewed": "{approved} of {checked} current reviews",
+    "issues": "Blocking issues",
+    "noIssues": "No blocking issues.",
+    "source": "Source",
+    "translation": "Translation",
+    "context": "Context",
+    "glossary": "Glossary",
+    "status": "Status",
+    "approve": "Approve",
+    "reject": "Request changes",
+    "approved": "Approved",
+    "rejected": "Changes requested",
+    "pending": "Pending",
+    "reviewer": "Reviewer",
+    "reviewedAt": "Reviewed",
+    "none": "-",
+    "stale": "Source changed since review",
+    "update": "Approve current source",
+    "updated": "Review recorded.",
+    "error": "Review could not be recorded.",
+    "locale": "Locale",
+    "key": "Key",
+    "actions": "Actions"
+  "Errors": {
+    "referenceLabel": "Reference ID",
+    "actions": {
+      "retry": "Try again",
+      "reauthenticate": "Sign in again",
+      "contact_support": "Contact support",
+      "refresh": "Refresh",
+      "none": "Dismiss"
+    },
+    "guidance": {
+      "invalidAmount": {
+        "title": "Check the amount",
+        "message": "Enter an amount greater than zero.",
+        "guidance": "Use the currency shown on this screen. Amounts are never converted automatically."
+      },
+      "invalidCredentials": {
+        "title": "Check your sign-in details",
+        "message": "We could not verify your wallet signature or account identifier.",
+        "guidance": "Reconnect your wallet, approve the new request, and try again. Wallet addresses are never translated."
+      },
+      "invalidInput": {
+        "title": "Review the details",
+        "message": "One or more values could not be accepted.",
+        "guidance": "Check the highlighted fields and keep identifiers exactly as provided."
+      },
+      "sessionExpired": {
+        "title": "Session needs attention",
+        "message": "Your secure session is no longer active.",
+        "guidance": "Sign in again to continue. Do not repeat a payment until you see its final status."
+      },
+      "accessDenied": {
+        "title": "Access restricted",
+        "message": "You do not have permission for this action.",
+        "guidance": "Switch to an account with the required access or contact support with the reference below."
+      },
+      "notFound": {
+        "title": "Not available",
+        "message": "We could not find the requested item.",
+        "guidance": "Refresh the list and check the identifier before trying again."
+      },
+      "conflict": {
+        "title": "State changed",
+        "message": "Something changed while your request was being processed.",
+        "guidance": "Refresh to see the latest state, then retry only if the action is still needed."
+      },
+      "duplicateRequest": {
+        "title": "Already submitted",
+        "message": "This request was already accepted.",
+        "guidance": "Check the current status instead of submitting it again; repeating it will not change the result."
+      },
+      "rateLimited": {
+        "title": "Please slow down",
+        "message": "Too many requests were sent in a short time.",
+        "guidance": "Wait for the suggested delay, then try again once."
+      },
+      "unavailable": {
+        "title": "Temporarily unavailable",
+        "message": "A required service is not responding.",
+        "guidance": "Wait a moment and retry. No money has moved unless you see a confirmed transaction."
+      },
+      "invalidLoan": {
+        "title": "Check the loan",
+        "message": "The loan identifier or reference is not valid.",
+        "guidance": "Copy the identifier exactly as shown in your loan details and try again."
+      },
+      "loanState": {
+        "title": "Loan state changed",
+        "message": "This action is not available for the current loan state.",
+        "guidance": "Refresh the loan details. Already-repaid loans never need another payment."
+      },
+      "insufficientFunds": {
+        "title": "Balance too low",
+        "message": "The account does not have enough available balance.",
+        "guidance": "Add funds or reduce the amount. The exact asset and units are shown in the form."
+      },
+      "blockchain": {
+        "title": "Network issue",
+        "message": "The network did not confirm the operation.",
+        "guidance": "Check the transaction status before retrying. Do not submit the same signed transaction twice."
+      },
+      "internal": {
+        "title": "Something went wrong",
+        "message": "We could not complete the request.",
+        "guidance": "Try again shortly. If it keeps happening, contact support with the reference below."
+      },
+      "fallback": {
+        "title": "Unexpected error",
+        "message": "An unexpected error occurred.",
+        "guidance": "Retry once, then contact support with the reference below if it persists."
+      }
+    }
+  "Offers": {
+    "title": "Compare loan and pool offers",
+    "description": "Sort columns with the keyboard or compare the card layout on small screens. Amounts keep their source currency.",
+    "caption": "Loan and pool offer comparison. Column headers sort the table; each row name is a row header.",
+    "summary": "Showing {visible} of {total} offers. Sorted by {column} {direction}. Filters: {filters}.",
+    "sortAction": "Activate to sort by this column",
+    "sortAscending": "ascending",
+    "sortDescending": "descending",
+    "loanName": "Loan {id}",
+    "poolName": "Lending pool",
+    "rate": "{value}%",
+    "termNone": "Flexible",
+    "filters": {
+      "searchLabel": "Search offers",
+      "searchPlaceholder": "Search by name or ID",
+      "currencyLabel": "Currency",
+      "kindLabel": "Offer type",
+      "statusLabel": "Status",
+      "all": "All",
+      "loan": "Loan",
+      "pool": "Pool"
+    },
+    "columns": {
+      "name": "Offer",
+      "kind": "Type",
+      "amount": "Amount available",
+      "ratePercent": "Rate / APY",
+      "termDays": "Term (days)",
+      "status": "Status"
+    },
+    "states": {
+      "loading": "Loading offers…",
+      "error": "Offers could not be loaded. Retry from the lender portal.",
+      "empty": "No offers match the current filters.",
+      "invalid": "That sort or filter action was invalid and was ignored."
+    }
+  "Privacy": {
+    "title": "Privacy",
+    "description": "Control how sensitive account data is displayed on this device.",
+    "reducedDataMode": "Reduced Data Mode",
+    "reducedDataModeDesc": "Mask account identifiers and balances on sensitive screens. Hidden values are absent from copied text, screenshots, and accessible names.",
+    "whenEnabled": "When enabled",
+    "addressesMasked": "Wallet addresses show as a mask instead of the real address",
+    "balancesMasked": "Balances and amounts show as a mask instead of the real value",
+    "scoresMasked": "Credit scores show as a mask instead of the real number",
+    "copyDisabled": "Copy buttons on masked values are disabled",
+    "revealHint": "Use the eye toggle on any masked value to temporarily reveal it",
+    "localOnly": "This preference is stored locally on this device only. It does not affect your account data on the blockchain or backend.",
+    "reveal": "Reveal",
+    "hide": "Hide",
+    "hidden": "hidden",
+    "copyDisabledHint": "Copy disabled (hidden)"
   }
 }
