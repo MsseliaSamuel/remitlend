@@ -205,7 +205,8 @@
     "details": "Detalles"
   },
   "AdminLayout": {
-    "adminArea": "Área de administración"
+    "adminArea": "Área de administración",
+    "translationsReview": "Traducciones financieras"
   },
   "AdminDisputes": {
     "eyebrow": "Consola admin",
@@ -474,5 +475,178 @@
         "definition": "Un préstamo está en impago cuando el prestatario no ha realizado el pago requerido en la fecha de vencimiento y se ha alcanzado el umbral de pagos incumplidos. Los préstamos en impago pueden desencadenar la liquidación de la garantía del prestatario."
       }
     }
+  "TranslationReview": {
+    "eyebrow": "Control de localización",
+    "title": "Revisión de traducciones financieras",
+    "description": "Revise términos monetarios y de préstamos según el glosario antes del lanzamiento. Las aprobaciones están vinculadas a la revisión de origen mostrada.",
+    "forbidden": "Necesitas el rol de administrador para revisar cadenas financieras.",
+    "releaseReady": "Puerta de lanzamiento: lista",
+    "releaseBlocked": "Puerta de lanzamiento: bloqueada",
+    "reviewed": "{approved} de {checked} revisiones vigentes",
+    "issues": "Incidencias bloqueantes",
+    "noIssues": "No hay incidencias bloqueantes.",
+    "source": "Origen",
+    "translation": "Traducción",
+    "context": "Contexto",
+    "glossary": "Glosario",
+    "status": "Estado",
+    "approve": "Aprobar",
+    "reject": "Solicitar cambios",
+    "approved": "Aprobado",
+    "rejected": "Cambios solicitados",
+    "pending": "Pendiente",
+    "reviewer": "Revisor",
+    "reviewedAt": "Revisado",
+    "none": "-",
+    "stale": "El origen cambió desde la revisión",
+    "update": "Aprobar origen actual",
+    "updated": "Revisión registrada.",
+    "error": "No se pudo registrar la revisión.",
+    "locale": "Idioma",
+    "key": "Clave",
+    "actions": "Acciones"
+  "Errors": {
+    "referenceLabel": "ID de referencia",
+    "actions": {
+      "retry": "Reintentar",
+      "reauthenticate": "Iniciar sesión de nuevo",
+      "contact_support": "Contactar con soporte",
+      "refresh": "Actualizar",
+      "none": "Cerrar"
+    },
+    "guidance": {
+      "invalidAmount": {
+        "title": "Revisa el importe",
+        "message": "Introduce un importe mayor que cero.",
+        "guidance": "Usa la moneda mostrada en esta pantalla. Los importes nunca se convierten automáticamente."
+      },
+      "invalidCredentials": {
+        "title": "Revisa tus datos de acceso",
+        "message": "No pudimos verificar la firma de tu billetera o el identificador de la cuenta.",
+        "guidance": "Vuelve a conectar tu billetera, aprueba la nueva solicitud e inténtalo de nuevo. Las direcciones nunca se traducen."
+      },
+      "invalidInput": {
+        "title": "Revisa los datos",
+        "message": "Uno o más valores no pudieron aceptarse.",
+        "guidance": "Revisa los campos marcados y conserva los identificadores tal como se proporcionaron."
+      },
+      "sessionExpired": {
+        "title": "Sesión pendiente",
+        "message": "Tu sesión segura ya no está activa.",
+        "guidance": "Inicia sesión de nuevo para continuar. No repitas un pago hasta ver su estado final."
+      },
+      "accessDenied": {
+        "title": "Acceso restringido",
+        "message": "No tienes permiso para esta acción.",
+        "guidance": "Cambia a una cuenta con el acceso necesario o contacta con soporte con la referencia siguiente."
+      },
+      "notFound": {
+        "title": "No disponible",
+        "message": "No encontramos el elemento solicitado.",
+        "guidance": "Actualiza la lista y comprueba el identificador antes de intentarlo de nuevo."
+      },
+      "conflict": {
+        "title": "El estado cambió",
+        "message": "Algo cambió mientras se procesaba tu solicitud.",
+        "guidance": "Actualiza para ver el estado más reciente y reintenta solo si la acción sigue siendo necesaria."
+      },
+      "duplicateRequest": {
+        "title": "Ya enviado",
+        "message": "Esta solicitud ya fue aceptada.",
+        "guidance": "Consulta el estado actual en lugar de enviarla de nuevo; repetirla no cambiará el resultado."
+      },
+      "rateLimited": {
+        "title": "Reduce la frecuencia",
+        "message": "Se enviaron demasiadas solicitudes en poco tiempo.",
+        "guidance": "Espera el tiempo sugerido y vuelve a intentarlo una vez."
+      },
+      "unavailable": {
+        "title": "No disponible temporalmente",
+        "message": "Un servicio necesario no responde.",
+        "guidance": "Espera un momento y reintenta. No se ha movido dinero salvo que veas una transacción confirmada."
+      },
+      "invalidLoan": {
+        "title": "Revisa el préstamo",
+        "message": "El identificador o la referencia del préstamo no es válido.",
+        "guidance": "Copia el identificador exactamente como aparece en los detalles del préstamo e inténtalo de nuevo."
+      },
+      "loanState": {
+        "title": "Estado del préstamo cambiado",
+        "message": "Esta acción no está disponible para el estado actual del préstamo.",
+        "guidance": "Actualiza los detalles. Los préstamos ya reembolsados no necesitan otro pago."
+      },
+      "insufficientFunds": {
+        "title": "Saldo insuficiente",
+        "message": "La cuenta no tiene saldo disponible suficiente.",
+        "guidance": "Añade fondos o reduce el importe. El activo y las unidades exactas se muestran en el formulario."
+      },
+      "blockchain": {
+        "title": "Problema de red",
+        "message": "La red no confirmó la operación.",
+        "guidance": "Comprueba el estado de la transacción antes de reintentar. No envíes dos veces la misma transacción firmada."
+      },
+      "internal": {
+        "title": "Algo salió mal",
+        "message": "No pudimos completar la solicitud.",
+        "guidance": "Vuelve a intentarlo en breve. Si persiste, contacta con soporte con la referencia siguiente."
+      },
+      "fallback": {
+        "title": "Error inesperado",
+        "message": "Se produjo un error inesperado.",
+        "guidance": "Reintenta una vez y, si persiste, contacta con soporte con la referencia siguiente."
+      }
+    }
+  "Offers": {
+    "title": "Comparar ofertas de préstamos y pool",
+    "description": "Ordena columnas con el teclado o compara las tarjetas en pantallas pequeñas. Los importes conservan su moneda de origen.",
+    "caption": "Comparación de ofertas de préstamos y pool. Los encabezados de columna ordenan la tabla; cada nombre de fila es un encabezado de fila.",
+    "summary": "Se muestran {visible} de {total} ofertas. Ordenadas por {column} {direction}. Filtros: {filters}.",
+    "sortAction": "Activar para ordenar por esta columna",
+    "sortAscending": "ascendente",
+    "sortDescending": "descendente",
+    "loanName": "Préstamo {id}",
+    "poolName": "Pool de préstamos",
+    "rate": "{value}%",
+    "termNone": "Flexible",
+    "filters": {
+      "searchLabel": "Buscar ofertas",
+      "searchPlaceholder": "Buscar por nombre o ID",
+      "currencyLabel": "Moneda",
+      "kindLabel": "Tipo de oferta",
+      "statusLabel": "Estado",
+      "all": "Todas",
+      "loan": "Préstamo",
+      "pool": "Pool"
+    },
+    "columns": {
+      "name": "Oferta",
+      "kind": "Tipo",
+      "amount": "Importe disponible",
+      "ratePercent": "Tasa / APY",
+      "termDays": "Plazo (días)",
+      "status": "Estado"
+    },
+    "states": {
+      "loading": "Cargando ofertas…",
+      "error": "No se pudieron cargar las ofertas. Reintentar desde el portal de prestamistas.",
+      "empty": "Ninguna oferta coincide con los filtros actuales.",
+      "invalid": "Esa acción de ordenación o filtro no era válida y se ignoró."
+    }
+  "Privacy": {
+    "title": "Privacidad",
+    "description": "Controla cómo se muestran los datos confidenciales de la cuenta en este dispositivo.",
+    "reducedDataMode": "Modo de Datos Reducido",
+    "reducedDataModeDesc": "Oculta identificadores de cuenta y saldos en pantallas sensibles. Los valores ocultos no aparecen en texto copiado, capturas de pantalla ni nombres accesibles.",
+    "whenEnabled": "Cuando está habilitado",
+    "addressesMasked": "Las direcciones de wallet se muestran como una máscara en lugar de la dirección real",
+    "balancesMasked": "Saldos y montos se muestran como una máscara en lugar del valor real",
+    "scoresMasked": "Las puntuaciones de crédito se muestran como una máscara en lugar del número real",
+    "copyDisabled": "Los botones de copiar en valores ocultos están deshabilitados",
+    "revealHint": "Usa el interruptor de ojo en cualquier valor oculto para revelarlo temporalmente",
+    "localOnly": "Esta preferencia se almacena localmente solo en este dispositivo. No afecta los datos de su cuenta en la blockchain o backend.",
+    "reveal": "Revelar",
+    "hide": "Ocultar",
+    "hidden": "oculto",
+    "copyDisabledHint": "Copia deshabilitada (oculto)"
   }
 }

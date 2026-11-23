@@ -1,5 +1,27 @@
 import { query } from '../db/connection.js';
 
+export interface AuditLogEntry {
+  action: string;
+  actor: string;
+  target?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export const auditLogService = {
+  async log(entry: AuditLogEntry): Promise<void> {
+    await query(
+      `INSERT INTO audit_logs (actor, action, target, payload, created_at)
+       VALUES ($1, $2, $3, $4, NOW())`,
+      [
+        entry.actor,
+        entry.action,
+        entry.target ?? null,
+        entry.metadata ? JSON.stringify(entry.metadata) : null,
+      ],
+    );
+  },
+};
+
 export interface AuditLogFilters {
   actor?: string;
   action?: string;

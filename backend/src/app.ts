@@ -22,6 +22,8 @@ import notificationsRoutes from './routes/notificationsRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import remittanceRoutes from './routes/remittanceRoutes.js';
 import transactionRoutes from './routes/transactionRoutes.js';
+import statementRoutes from './routes/statementRoutes.js';
+import orphanedTxRoutes from './routes/orphanedTxRoutes.js';
 import { registerStatusRoutes } from './routes/statusRoutes.js';
 import internalRoutes from './routes/internalRoutes.js';
 import { requireApiKey } from './middleware/auth.js';
@@ -39,14 +41,20 @@ import { shutdownCoordinator } from './middleware/shutdownHandler.js';
 import { reportCSPViolation } from './controllers/cspReportController.js';
 import { pauseGuard } from './middleware/pauseGuard.js';
 import { deprecationHeadersMiddleware } from './middleware/deprecationHeaders.js';
+import { cacheInvalidationHeaderMiddleware } from './middleware/cacheInvalidationHeader.js';
 import { asyncHandler } from './utils/asyncHandler.js';
 import { AppError } from './errors/AppError.js';
 import logger from './utils/logger.js';
+import {
+  checkNetworkReadiness,
+  SUPPORTED_API_VERSION_MANIFEST,
+} from './config/networkReadiness.js';
 import {
   setupConnectionLeakDetection,
   shutdownConnectionLeakDetection,
   dbConnectionLeakDetector,
 } from './middleware/dbConnectionLeakDetector.js';
+import { buildCapacitySnapshot } from './services/capacityModel.js';
 const app = express();
 
 setupConnectionLeakDetection();
@@ -187,6 +195,11 @@ app.use(idempotencyMiddleware);
 // Issue #1381: Cross-layer emergency pause coordination
 app.use(pauseGuard);
 
+// Cache invalidation header propagation (#853): ensure Cache-Invalidation-Token
+// headers set by deletion endpoints survive compression and carry no-store
+// directives so proxies do not cache projection-invalidating responses.
+app.use(cacheInvalidationHeaderMiddleware);
+
 app.post(
   '/api/v1/csp-report',
   asyncHandler(async (req: Request, res: Response) => reportCSPViolation(req, res)),
@@ -218,8 +231,54 @@ app.get('/version', (_req: Request, res: Response) => {
       remittanceNft: process.env.REMITTANCE_NFT_CONTRACT_ID ?? 'unknown',
       multisigGovernance: process.env.MULTISIG_GOVERNANCE_CONTRACT_ID ?? 'unknown',
     },
+    supportedVersions: SUPPORTED_API_VERSION_MANIFEST,
   });
 });
+
+/**
+ * GET /ready
+ *
+ * Kubernetes-style readiness probe — issue #862.
+ *
+ * Validates network passphrase, RPC endpoint, all contract IDs, asset issuer
+ * metadata, and the supported-version manifest.  Returns:
+ *   200  — ready to serve financial routes (no critical issues).
+ *   503  — not ready (one or more critical issues found).
+ *
+ * Warning-level issues (e.g. optional asset issuers not configured) are
+ * included in the response but do not change the HTTP status code.
+ *
+ * The live RPC probe is intentionally included so load balancers can detect
+ * an RPC outage and route around the affected instance.  When
+ * SOROBAN_REQUIRE_RPC_AT_STARTUP=true the RPC check is treated as critical.
+ *
+ * Response body shape:
+ * {
+ *   ready: boolean,
+ *   healthy: boolean,
+ *   durationMs: number,
+ *   issues: Array<{ field: string, message: string, severity: "critical"|"warning" }>,
+ *   versions: { minApiVersion: number, maxApiVersion: number, deprecatedVersions: number[] }
+ * }
+ *
+ * No secret values are exposed in any field of this response.
+ */
+app.get(
+  '/ready',
+  asyncHandler(async (_req: Request, res: Response) => {
+    const result = await checkNetworkReadiness();
+
+    const body = {
+      ready: result.ready,
+      healthy: result.healthy,
+      durationMs: result.durationMs,
+      issues: result.issues,
+      versions: SUPPORTED_API_VERSION_MANIFEST,
+    };
+
+    res.status(result.ready ? 200 : 503).json(body);
+  }),
+);
 
 app.get(
   '/health',
@@ -273,6 +332,50 @@ app.get(
  * - System metrics: process_*, nodejs_* (default prom-client metrics)
  */
 app.get('/metrics', requireApiKey('admin:indexer'), asyncHandler(metricsHandler));
+
+/**
+ * GET /capacity
+ *
+ * On-demand capacity model snapshot — issue #865.
+ *
+ * Returns a point-in-time forecast of database storage, connection demand,
+ * and Redis memory, plus retention headroom and scale threshold crossings.
+ * Requires admin:indexer API key (same gate as /metrics).
+ *
+ * Query parameters:
+ *   forecastDays  (integer, default 30) — projection horizon.
+ *
+ * Response body:
+ * {
+ *   capturedAt: ISO string,
+ *   forecastDays: number,
+ *   overallThresholdLevel: "ok" | "warn" | "critical",
+ *   tables: [ { table, rowCount, estimatedBytes, projectedBytes,
+ *                retentionDays, eligibleForPurge, thresholdLevel } ],
+ *   totalDbEstimatedBytes: number,
+ *   totalDbProjectedBytes: number,
+ *   connectionDemand: { peakConnections, projectedPeakConnections,
+ *                        connectionUtilizationRatio, thresholdLevel },
+ *   redisMemoryModel: { totalBytesEstimate, projectedBytesEstimate },
+ *   thresholds: { tableStorageWarnBytes, tableStorageCriticalBytes, ... }
+ * }
+ *
+ * No secret values, no user-identifying data, and no financial amounts are
+ * included in any field of this response.
+ */
+app.get(
+  '/capacity',
+  requireApiKey('admin:indexer'),
+  asyncHandler(async (req: Request, res: Response) => {
+    const rawDays = req.query['forecastDays'];
+    const forecastDays = typeof rawDays === 'string' && /^\d+$/.test(rawDays)
+      ? Math.min(Math.max(Number.parseInt(rawDays, 10), 1), 365)
+      : 30;
+
+    const snapshot = await buildCapacitySnapshot(forecastDays);
+    res.json(snapshot);
+  }),
+);
 
 /**
  * GET /health/deep
@@ -387,6 +490,10 @@ app.use('/api/notifications', notificationsRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/remittances', remittanceRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/statements', statementRoutes);
+
+// Orphaned transaction reconciliation routes (issue #858)
+app.use('/api/transactions', orphanedTxRoutes);
 
 // Versioned API routes (v1 - current)
 app.use('/api/v1', simulationRoutes);
@@ -397,9 +504,13 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/remittances', remittanceRoutes);
 app.use('/api/v1/transactions', transactionRoutes);
+
+// Orphaned transaction reconciliation routes (issue #858)
+app.use('/api/v1/transactions', orphanedTxRoutes);
 app.use('/api/v1/pool', poolRoutes);
 app.use('/api/v1/notifications', notificationsRoutes);
 app.use('/api/v1/events', eventRoutes);
+app.use('/api/v1/statements', statementRoutes);
 app.use('/user', userRoutes);
 
 // Internal service-to-service routes (HMAC-signed only)

@@ -1,6 +1,9 @@
 import { Pool } from 'pg';
+import { deepRedact } from '../utils/logger.js';
+import { maskValue } from './piiCrypto.js';
+import { auditLogService } from './auditLogService.js';
 import { deepRedact } from '../utils/logger';
-import { maskValue } from '../utils/piiCrypto';
+import { maskValue } from '../utils/masking.js';
 import { auditLogService } from './auditLogService';
 
 /**
@@ -36,13 +39,7 @@ export const DIAGNOSTIC_BUNDLE_SCHEMA = {
 } as const;
 
 export type DiagnosticFailureCategory =
-  | 'none'
-  | 'pending'
-  | 'validation'
-  | 'network'
-  | 'insufficient_funds'
-  | 'rejected'
-  | 'unknown';
+  'none' | 'pending' | 'validation' | 'network' | 'insufficient_funds' | 'rejected' | 'unknown';
 
 export interface DiagnosticBundleTransaction {
   id: string;
@@ -127,7 +124,7 @@ function maskOrRedact(value: unknown): string {
     return '';
   }
   try {
-    const masked = maskValue(str);
+    const masked = maskValue(str, 'name');
     if (typeof masked === 'string' && masked.length > 0) {
       return masked;
     }
@@ -146,13 +143,25 @@ export function deriveFailureCategory(
   resultXdr: string | null | undefined,
 ): DiagnosticFailureCategory {
   const normalizedStatus = (status || '').toLowerCase();
-  if (normalizedStatus === 'success' || normalizedStatus === 'succeeded' || normalizedStatus === 'confirmed') {
+  if (
+    normalizedStatus === 'success' ||
+    normalizedStatus === 'succeeded' ||
+    normalizedStatus === 'confirmed'
+  ) {
     return 'none';
   }
-  if (normalizedStatus === 'pending' || normalizedStatus === 'submitted' || normalizedStatus === 'processing') {
+  if (
+    normalizedStatus === 'pending' ||
+    normalizedStatus === 'submitted' ||
+    normalizedStatus === 'processing'
+  ) {
     return 'pending';
   }
-  if (normalizedStatus === 'failed' || normalizedStatus === 'error' || normalizedStatus === 'rejected') {
+  if (
+    normalizedStatus === 'failed' ||
+    normalizedStatus === 'error' ||
+    normalizedStatus === 'rejected'
+  ) {
     // We deliberately do not parse or export result_xdr. We only use its
     // presence to distinguish a rejected submission from an unknown failure.
     if (resultXdr && String(resultXdr).length > 0) {
@@ -222,17 +231,22 @@ export class DiagnosticBundleService {
     options: CreateDiagnosticBundleOptions = {},
   ): Promise<{ bundleId: string; expiresAt: string }> {
     if (!transactionId || !publicKey) {
-      throw new DiagnosticBundleError('invalid_request', 'transactionId and publicKey are required', 400);
+      throw new DiagnosticBundleError(
+        'invalid_request',
+        'transactionId and publicKey are required',
+        400,
+      );
     }
 
-    const ttlMs = options.ttlMs && options.ttlMs > 0 ? options.ttlMs : DIAGNOSTIC_BUNDLE_DEFAULT_TTL_MS;
+    const ttlMs =
+      options.ttlMs && options.ttlMs > 0 ? options.ttlMs : DIAGNOSTIC_BUNDLE_DEFAULT_TTL_MS;
     const appVersion = options.appVersion ? redactString(options.appVersion) : 'unknown';
 
     // Fetch ONLY allowlisted columns, scoped to the caller's ownership.
     const txResult = await this.pool.query(
       `SELECT id, tx_hash, status, submitted_at, updated_at, transaction_type, result_xdr
          FROM transaction_submissions
-        WHERE id = $1 AND submitted_by = $2
+        WHERE (id::text = $1 OR tx_hash = $1) AND submitted_by = $2
         LIMIT 1`,
       [transactionId, publicKey],
     );
@@ -245,7 +259,8 @@ export class DiagnosticBundleService {
 
     // Optional audit correlation entries, filtered by action/target.
     let auditCorrelation: DiagnosticAuditCorrelation[] = [];
-    const auditActions = options.auditActions && options.auditActions.length > 0 ? options.auditActions : null;
+    const auditActions =
+      options.auditActions && options.auditActions.length > 0 ? options.auditActions : null;
     try {
       const auditResult = await this.pool.query(
         `SELECT action, target, created_at
@@ -313,7 +328,11 @@ export class DiagnosticBundleService {
    */
   async getDiagnosticBundle(bundleId: string, publicKey: string): Promise<DiagnosticBundle> {
     if (!bundleId || !publicKey) {
-      throw new DiagnosticBundleError('invalid_request', 'bundleId and publicKey are required', 400);
+      throw new DiagnosticBundleError(
+        'invalid_request',
+        'bundleId and publicKey are required',
+        400,
+      );
     }
 
     const result = await this.pool.query(
@@ -334,7 +353,8 @@ export class DiagnosticBundleService {
       throw new DiagnosticBundleError('expired', 'Diagnostic bundle has expired', 410);
     }
 
-    const bundle = typeof row.bundle === 'string' ? (JSON.parse(row.bundle) as DiagnosticBundle) : row.bundle;
+    const bundle =
+      typeof row.bundle === 'string' ? (JSON.parse(row.bundle) as DiagnosticBundle) : row.bundle;
     return deepRedact(bundle) as DiagnosticBundle;
   }
 
@@ -343,7 +363,11 @@ export class DiagnosticBundleService {
    */
   async deleteDiagnosticBundle(bundleId: string, publicKey: string): Promise<void> {
     if (!bundleId || !publicKey) {
-      throw new DiagnosticBundleError('invalid_request', 'bundleId and publicKey are required', 400);
+      throw new DiagnosticBundleError(
+        'invalid_request',
+        'bundleId and publicKey are required',
+        400,
+      );
     }
 
     const result = await this.pool.query(
